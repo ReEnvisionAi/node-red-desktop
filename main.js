@@ -77,13 +77,13 @@ if (!app.requestSingleInstanceLock()) {
             app.whenReady().then(function () {
                 var icon = (process.platform === 'darwin') ? 'iconTemplate.png' : 'icon.png';
                 tray = new Tray(path.join(__dirname, 'build' ,icon));
-                tray.setToolTip('Node-RED');
+                tray.setToolTip('Offline - AgentOS');
                 tray.on('click', function () {
                     shell.openExternal(url);
                 });
                 tray.setContextMenu(Menu.buildFromTemplate([
                     {
-                        label: 'Node-RED', click: function () {
+                        label: 'Offline - AgentOS', click: function () {
                             shell.openExternal(url);
                         }
                     },

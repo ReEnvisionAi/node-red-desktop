@@ -7,7 +7,7 @@
   },
   "build": {
     "appId": "com.electron.node-red",
-    "productName": "Node-RED",
+    "productName": "Offline - AgentOS",
     "asar": false,
     "files": [
       "**/*",
@@ -63,7 +63,7 @@
     "electron": "35.7.5",
     "electron-builder": "26.7.0"
   },
-  "description": "Node-RED installer",
+  "description": "Offline - AgentOS installer",
   "keywords": [
     "node-red",
     "installer",
