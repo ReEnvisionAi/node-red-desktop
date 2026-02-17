@@ -23,7 +23,7 @@ var expressApp = require('express')();
 var server = http.createServer(expressApp);
 var RED = require('node-red');
 var { app, Menu, dialog, shell, Tray } = require('electron');
-var log = require('electron-log');
+var log = require('electron-log/main');
 Object.assign(console, log.functions);
 var tray = null;
 
@@ -48,7 +48,7 @@ if (!app.requestSingleInstanceLock()) {
 } else {
     RED.hooks.add("postInstall", function (event, done) {
         var cmd = (process.platform === 'win32') ? 'npm.cmd' : 'npm';
-        var args = ['install', 'electron-rebuild'];
+        var args = ['install', '@electron/rebuild'];
         child_process.execFile(cmd, args, { cwd: settings.userDir }, function (error) {
             if (!error) {
                 var cmd2 = path.join('node_modules', '.bin',
