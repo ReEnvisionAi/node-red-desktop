@@ -8,7 +8,11 @@
   "build": {
     "appId": "com.electron.node-red",
     "productName": "Offline - AgentOS",
-    "asar": false,
+    "asar": true,
+    "asarUnpack": [
+      "build/**",
+      "node_modules/@node-red/**"
+    ],
     "files": [
       "**/*",
       {
@@ -53,7 +57,8 @@
   },
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "rebrand": "node scripts/rebrand.js",
+    "build": "node scripts/rebrand.js && electron-builder"
   },
   "dependencies": {
     "electron-log": "5.4.3",
