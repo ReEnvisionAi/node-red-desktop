@@ -33,7 +33,21 @@ var settings = {
     httpAdminRoot: '/red',
     httpNodeRoot: '/',
     userDir: path.join(os.homedir(), '.node-red-standalone'),
-    editorTheme: { projects: { enabled: true } }
+    editorTheme: {
+        projects: { enabled: true },
+        page: {
+            title: 'Offline - AgentOS',
+            favicon: path.join(__dirname, 'build', 'icon.png'),
+            tabicon: {
+                icon: path.join(__dirname, 'build', 'icon.png'),
+                colour: '#6B5CE7'
+            }
+        },
+        header: {
+            title: 'Offline - AgentOS',
+            image: path.join(__dirname, 'build', 'icon.png')
+        }
+    }
 };
 var url = 'http://' + settings.uiHost + ':' + settings.uiPort + settings.httpAdminRoot;
 

@@ -53,7 +53,8 @@
   },
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "rebrand": "node scripts/rebrand.js",
+    "build": "node scripts/rebrand.js && electron-builder"
   },
   "dependencies": {
     "electron-log": "5.4.3",
