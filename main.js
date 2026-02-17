@@ -27,6 +27,9 @@ var log = require('electron-log/main');
 Object.assign(console, log.functions);
 var tray = null;
 
+// When using asar, unpacked files live under app.asar.unpacked instead of app.asar
+var unpackedDir = __dirname.replace('app.asar', 'app.asar.unpacked');
+
 var settings = {
     uiHost: '127.0.0.1',
     uiPort: process.env.PORT || 1880,
@@ -37,15 +40,15 @@ var settings = {
         projects: { enabled: true },
         page: {
             title: 'Offline - AgentOS',
-            favicon: path.join(__dirname, 'build', 'icon.png'),
+            favicon: path.join(unpackedDir, 'build', 'icon.png'),
             tabicon: {
-                icon: path.join(__dirname, 'build', 'icon.png'),
+                icon: path.join(unpackedDir, 'build', 'icon.png'),
                 colour: '#6B5CE7'
             }
         },
         header: {
             title: 'Offline - AgentOS',
-            image: path.join(__dirname, 'build', 'icon.png')
+            image: path.join(unpackedDir, 'build', 'icon.png')
         }
     }
 };
@@ -90,7 +93,7 @@ if (!app.requestSingleInstanceLock()) {
         RED.start().then(function () {
             app.whenReady().then(function () {
                 var icon = (process.platform === 'darwin') ? 'iconTemplate.png' : 'icon.png';
-                tray = new Tray(path.join(__dirname, 'build' ,icon));
+                tray = new Tray(path.join(unpackedDir, 'build' ,icon));
                 tray.setToolTip('Offline - AgentOS');
                 tray.on('click', function () {
                     shell.openExternal(url);

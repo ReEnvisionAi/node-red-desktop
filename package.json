@@ -8,7 +8,11 @@
   "build": {
     "appId": "com.electron.node-red",
     "productName": "Offline - AgentOS",
-    "asar": false,
+    "asar": true,
+    "asarUnpack": [
+      "build/**",
+      "node_modules/@node-red/**"
+    ],
     "files": [
       "**/*",
       {
