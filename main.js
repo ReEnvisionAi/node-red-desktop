@@ -25,7 +25,6 @@ var RED = require('node-red');
 var { app, Menu, dialog, shell, Tray } = require('electron');
 var log = require('electron-log/main');
 Object.assign(console, log.functions);
-var agentGrid = (process.platform === 'darwin') ? require('./agent-grid') : null;
 var tray = null;
 
 // When using asar, unpacked files live under app.asar.unpacked instead of app.asar
@@ -98,44 +97,19 @@ if (!app.requestSingleInstanceLock()) {
                 tray.on('click', function () {
                     shell.openExternal(url);
                 });
-                var menuItems = [
+                tray.setContextMenu(Menu.buildFromTemplate([
                     {
                         label: 'Offline - AgentOS', click: function () {
                             shell.openExternal(url);
                         }
+                    },
+                    {
+                        label: 'Quit', click: function () {
+                            app.exit(1);
+                        }
                     }
-                ];
-                if (agentGrid) {
-                    menuItems.push({ type: 'separator' });
-                    if (agentGrid.isInstalled()) {
-                        menuItems.push({
-                            label: 'Launch Agent Grid', click: function () {
-                                agentGrid.launchAgentGrid();
-                            }
-                        });
-                    } else {
-                        menuItems.push({
-                            label: 'Install Agent Grid...', click: function () {
-                                agentGrid.promptInstall();
-                            }
-                        });
-                    }
-                }
-                menuItems.push({ type: 'separator' });
-                menuItems.push({
-                    label: 'Quit', click: function () {
-                        app.exit(1);
-                    }
-                });
-                tray.setContextMenu(Menu.buildFromTemplate(menuItems));
+                ]));
                 shell.openExternal(url);
-
-                // On macOS, prompt to install Agent Grid if not already installed
-                if (agentGrid && !agentGrid.isInstalled()) {
-                    setTimeout(function () {
-                        agentGrid.promptInstall();
-                    }, 3000);
-                }
             });
         }).catch(function (error) {
             dialog.showErrorBox('Error', error.toString());
