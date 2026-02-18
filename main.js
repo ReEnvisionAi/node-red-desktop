@@ -92,8 +92,7 @@ if (!app.requestSingleInstanceLock()) {
     server.listen(settings.uiPort, settings.uiHost, function () {
         RED.start().then(function () {
             app.whenReady().then(function () {
-                var icon = (process.platform === 'darwin') ? 'iconTemplate.png' : 'icon.png';
-                tray = new Tray(path.join(unpackedDir, 'build' ,icon));
+                tray = new Tray(path.join(unpackedDir, 'build', 'icon.png'));
                 tray.setToolTip('Offline - AgentOS');
                 tray.on('click', function () {
                     shell.openExternal(url);
