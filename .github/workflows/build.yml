@@ -1,0 +1,34 @@
+name: Build
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact-name: windows-installer
+            artifact-path: dist/*.msi
+          - os: macos-latest
+            artifact-name: macos-installer
+            artifact-path: dist/*.dmg
+          - os: ubuntu-latest
+            artifact-name: linux-installer
+            artifact-path: dist/*.deb
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - run: npm install
+    - run: npm run build
+      env:
+        GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        USE_HARD_LINKS: false
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{matrix.artifact-name}}
+        path: ${{matrix.artifact-path}}

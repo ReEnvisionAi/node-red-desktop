@@ -1,0 +1,82 @@
+{
+  "name": "agentos-installer",
+  "version": "1.0.0",
+  "main": "main.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "build": {
+    "appId": "com.reenvision.agentos",
+    "productName": "Offline - AgentOS",
+    "asar": true,
+    "asarUnpack": [
+      "build/**",
+      "node_modules/@node-red/**"
+    ],
+    "files": [
+      "**/*",
+      {
+        "from": "node_modules/@node-red",
+        "to": "node_modules/@node-red"
+      },
+      {
+        "from": "build",
+        "to": "build"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "msi"
+        }
+      ]
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        {
+          "target": "dmg"
+        }
+      ]
+    },
+    "linux": {
+      "category": "Development",
+      "target": [
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "armv7l"
+          ]
+        },
+        {
+          "target": "rpm"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "start": "electron .",
+    "rebrand": "node scripts/rebrand.js",
+    "build": "node scripts/rebrand.js && electron-builder"
+  },
+  "dependencies": {
+    "electron-log": "5.4.3",
+    "node-red": "4.1.5"
+  },
+  "devDependencies": {
+    "electron": "35.7.5",
+    "electron-builder": "26.7.0"
+  },
+  "description": "Offline - AgentOS with Agent Grid distributed inference",
+  "keywords": [
+    "agentos",
+    "agent-grid",
+    "node-red",
+    "installer",
+    "electron"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/ReEnvisionAi/agentos-installer",
+  "author": "ReEnvision AI"
+}
