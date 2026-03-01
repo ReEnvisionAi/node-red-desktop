@@ -73,23 +73,6 @@ settings.functionGlobalContext = {
 
 var url = 'http://' + settings.uiHost + ':' + settings.uiPort + settings.httpAdminRoot;
 
-// Resolve a real Node.js binary so Node-RED child-process calls work.
-// In a packaged Electron app process.execPath points to the Electron exe,
-// which causes "spawn EINVAL" on Windows if overridden to a bare 'node'.
-var resolvedNode = null;
-try {
-    resolvedNode = child_process.execFileSync(
-        process.platform === 'win32' ? 'where' : 'which',
-        ['node'],
-        { encoding: 'utf8', timeout: 5000 }
-    ).split(/\r?\n/)[0].trim();
-} catch (_) {
-    // node not on PATH — leave process.execPath as-is (Electron binary)
-}
-if (resolvedNode) {
-    process.execPath = resolvedNode;
-}
-
 if (process.platform === 'darwin') {
     process.env.PATH += ':/usr/local/bin';
     app.dock.hide();
@@ -112,12 +95,12 @@ if (!app.requestSingleInstanceLock()) {
     RED.hooks.add("postInstall", function (event, done) {
         var cmd = (process.platform === 'win32') ? 'npm.cmd' : 'npm';
         var args = ['install', '@electron/rebuild'];
-        child_process.execFile(cmd, args, { cwd: settings.userDir }, function (error) {
+        child_process.execFile(cmd, args, { cwd: settings.userDir, shell: true }, function (error) {
             if (!error) {
                 var cmd2 = path.join('node_modules', '.bin',
                     (process.platform === 'win32') ? 'electron-rebuild.cmd' : 'electron-rebuild');
                 var args2 = ['-v', process.versions.electron];
-                child_process.execFile(cmd2, args2, { cwd: event.dir }, function (error2) {
+                child_process.execFile(cmd2, args2, { cwd: event.dir, shell: true }, function (error2) {
                     if (!error2) {
                         done();
                     } else {
@@ -157,7 +140,7 @@ if (!app.requestSingleInstanceLock()) {
             if (!fs.existsSync(puppeteerCheck)) {
                 console.log('Installing Puppeteer (first-run setup, this downloads Chromium)...');
                 var npmCmd = (process.platform === 'win32') ? 'npm.cmd' : 'npm';
-                child_process.execFile(npmCmd, ['install', 'puppeteer'], { cwd: settings.userDir }, function (error) {
+                child_process.execFile(npmCmd, ['install', 'puppeteer'], { cwd: settings.userDir, shell: true }, function (error) {
                     if (error) {
                         console.error('Failed to install Puppeteer:', error.message);
                     } else {
