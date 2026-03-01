@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Replaces Node-RED editor logos with Offline - AgentOS branding.
+ * Replaces Node-RED editor logos with AgentOS branding.
  * Run before electron-builder to ensure the packaged app has custom icons.
  */
 var fs = require('fs');
@@ -48,7 +48,7 @@ fs.copyFileSync(iconSrc, path.join(editorPublic, 'favicon.ico'));
 // Update default titles in theme.js
 console.log('Updating theme defaults...');
 var themeContent = fs.readFileSync(themeFile, 'utf8');
-themeContent = themeContent.replace(/title: "Node-RED"/g, 'title: "Offline - AgentOS"');
+themeContent = themeContent.replace(/title: "Node-RED"/g, 'title: "AgentOS"');
 fs.writeFileSync(themeFile, themeContent);
 
 console.log('Rebranding complete!');
