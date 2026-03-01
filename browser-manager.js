@@ -42,8 +42,16 @@ function createBrowserManager(userDir) {
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
+                    // Fix for Sandpack cross-origin iframe network timeouts
+                    '--disable-features=IsolateOrigins,site-per-process',
+                    '--disable-web-security',
+                    '--disable-site-isolation-trials',
+                    // Fix for WebGL / Three.js "Context Lost" crashes
+                    '--use-gl=swiftshader',
+                    '--ignore-gpu-blocklist',
                     '--disable-gpu'
-                ]
+                ],
+                defaultViewport: { width: 1280, height: 800 }
             });
 
             browser.on('disconnected', function () {
