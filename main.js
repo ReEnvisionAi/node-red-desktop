@@ -1,5 +1,5 @@
 /**
- * Copyright OpenJS Foundation and other contributors 
+ * Copyright OpenJS Foundation and other contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ var server = http.createServer(expressApp);
 var RED = require('node-red');
 var { app, Menu, dialog, shell, Tray } = require('electron');
 var log = require('electron-log/main');
+var createBrowserManager = require('./browser-manager');
 Object.assign(console, log.functions);
 var tray = null;
 
@@ -36,6 +37,17 @@ var settings = {
     httpAdminRoot: '/red',
     httpNodeRoot: '/',
     userDir: path.join(os.homedir(), '.node-red-standalone'),
+    flowFile: 'flows.json',
+
+    // Allow the WebOS (browser) to call local Node-RED HTTP endpoints
+    httpNodeCors: {
+        origin: '*',
+        methods: 'GET,PUT,POST,DELETE,OPTIONS'
+    },
+
+    // Allow Function nodes to require() external npm packages
+    functionExternalModules: true,
+
     editorTheme: {
         projects: { enabled: true },
         page: {
@@ -52,6 +64,13 @@ var settings = {
         }
     }
 };
+
+// Browser lifecycle manager — provides a warm Chromium instance to flow endpoints
+var browserManager = createBrowserManager(settings.userDir);
+settings.functionGlobalContext = {
+    getBrowser: browserManager.getBrowser
+};
+
 var url = 'http://' + settings.uiHost + ':' + settings.uiPort + settings.httpAdminRoot;
 
 process.execPath = 'node';
@@ -59,6 +78,17 @@ if (process.platform === 'darwin') {
     process.env.PATH += ':/usr/local/bin';
     app.dock.hide();
 }
+
+// Graceful shutdown — kill lingering Chromium processes
+function gracefulShutdown(code) {
+    browserManager.closeBrowser().finally(function () {
+        app.exit(code);
+    });
+}
+
+process.on('SIGTERM', function () { gracefulShutdown(0); });
+process.on('SIGINT', function () { gracefulShutdown(0); });
+
 if (!app.requestSingleInstanceLock()) {
     shell.openExternal(url);
     app.quit();
@@ -82,6 +112,20 @@ if (!app.requestSingleInstanceLock()) {
             }
         });
     });
+
+    // First-run setup: ensure userDir exists and seed default WebOS flows
+    if (!fs.existsSync(settings.userDir)) {
+        fs.mkdirSync(settings.userDir, { recursive: true });
+    }
+    var flowsFile = path.join(settings.userDir, settings.flowFile);
+    if (!fs.existsSync(flowsFile)) {
+        var defaultFlows = path.join(__dirname, 'default-flows.json');
+        if (fs.existsSync(defaultFlows)) {
+            fs.copyFileSync(defaultFlows, flowsFile);
+            console.log('Default WebOS System Services flows installed');
+        }
+    }
+
     RED.init(server, settings);
     expressApp.use(settings.httpAdminRoot, RED.httpAdmin);
     expressApp.use(settings.httpNodeRoot, RED.httpNode);
@@ -91,6 +135,21 @@ if (!app.requestSingleInstanceLock()) {
     });
     server.listen(settings.uiPort, settings.uiHost, function () {
         RED.start().then(function () {
+
+            // Install Puppeteer in userDir if not already present (downloads Chromium)
+            var puppeteerCheck = path.join(settings.userDir, 'node_modules', 'puppeteer');
+            if (!fs.existsSync(puppeteerCheck)) {
+                console.log('Installing Puppeteer (first-run setup, this downloads Chromium)...');
+                var npmCmd = (process.platform === 'win32') ? 'npm.cmd' : 'npm';
+                child_process.execFile(npmCmd, ['install', 'puppeteer'], { cwd: settings.userDir }, function (error) {
+                    if (error) {
+                        console.error('Failed to install Puppeteer:', error.message);
+                    } else {
+                        console.log('Puppeteer installed successfully — WebOS browser services are ready');
+                    }
+                });
+            }
+
             app.whenReady().then(function () {
                 tray = new Tray(path.join(unpackedDir, 'build', 'icon.png'));
                 tray.setToolTip('Offline - AgentOS');
@@ -105,7 +164,7 @@ if (!app.requestSingleInstanceLock()) {
                     },
                     {
                         label: 'Quit', click: function () {
-                            app.exit(1);
+                            gracefulShutdown(0);
                         }
                     }
                 ]));

@@ -68,12 +68,15 @@
     "electron": "35.7.5",
     "electron-builder": "26.7.0"
   },
-  "description": "Offline - AgentOS installer",
+  "description": "Offline - AgentOS with WebOS Edge Node browser services",
   "keywords": [
     "node-red",
     "installer",
     "standalone",
-    "electron"
+    "electron",
+    "webos",
+    "edge-node",
+    "puppeteer"
   ],
   "license": "Apache-2.0",
   "homepage": "https://nodered.org",

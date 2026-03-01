@@ -1,0 +1,151 @@
+[
+    {
+        "id": "webos-services-tab",
+        "type": "tab",
+        "label": "WebOS System Services",
+        "disabled": false,
+        "info": "Local Edge Node services for the browser-based WebOS.\nExposes headless browser capabilities (screenshots, scraping, PDF generation)\nvia localhost HTTP endpoints that the WebOS can call."
+    },
+    {
+        "id": "webos-comment",
+        "type": "comment",
+        "z": "webos-services-tab",
+        "name": "WebOS Local Edge Node - Headless Browser Services",
+        "info": "These endpoints provide RPC-style access to a warm Chromium instance.\nThe WebOS (running in the user's browser) makes fetch() calls to these\nlocalhost endpoints to perform tasks that require a full browser engine.\n\nEndpoints:\n- POST /os/screenshot - Capture a screenshot of a URL or HTML\n- POST /os/scrape - Extract text content from a JavaScript-rendered page\n- POST /os/pdf - Generate a PDF from HTML content",
+        "x": 310,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "screenshot-in",
+        "type": "http in",
+        "z": "webos-services-tab",
+        "name": "POST /os/screenshot",
+        "url": "/os/screenshot",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 120,
+        "wires": [
+            ["screenshot-func"]
+        ]
+    },
+    {
+        "id": "screenshot-func",
+        "type": "function",
+        "z": "webos-services-tab",
+        "name": "Take Screenshot",
+        "func": "const getBrowser = global.get('getBrowser');\nif (!getBrowser) {\n    msg.payload = { success: false, error: 'Browser service not available. Puppeteer may still be installing.' };\n    msg.statusCode = 503;\n    return msg;\n}\n\nconst url = msg.payload.url;\nconst html = msg.payload.html;\n\nif (!url && !html) {\n    msg.payload = { success: false, error: 'Provide either \"url\" or \"html\" in the request body.' };\n    msg.statusCode = 400;\n    return msg;\n}\n\ntry {\n    const browser = await getBrowser();\n    const page = await browser.newPage();\n    try {\n        await page.setViewport({ width: 1280, height: 800 });\n        if (url) {\n            await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });\n        } else {\n            await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });\n        }\n        const screenshot = await page.screenshot({ encoding: 'base64', fullPage: false });\n        msg.payload = { success: true, image: 'data:image/png;base64,' + screenshot };\n    } finally {\n        await page.close();\n    }\n} catch (err) {\n    msg.payload = { success: false, error: err.message };\n    msg.statusCode = 500;\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 60,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 120,
+        "wires": [
+            ["screenshot-out"]
+        ]
+    },
+    {
+        "id": "screenshot-out",
+        "type": "http response",
+        "z": "webos-services-tab",
+        "name": "Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 570,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "scrape-in",
+        "type": "http in",
+        "z": "webos-services-tab",
+        "name": "POST /os/scrape",
+        "url": "/os/scrape",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 240,
+        "wires": [
+            ["scrape-func"]
+        ]
+    },
+    {
+        "id": "scrape-func",
+        "type": "function",
+        "z": "webos-services-tab",
+        "name": "Scrape Page Text",
+        "func": "const getBrowser = global.get('getBrowser');\nif (!getBrowser) {\n    msg.payload = { success: false, error: 'Browser service not available. Puppeteer may still be installing.' };\n    msg.statusCode = 503;\n    return msg;\n}\n\nconst url = msg.payload.url;\nif (!url) {\n    msg.payload = { success: false, error: 'Provide \"url\" in the request body.' };\n    msg.statusCode = 400;\n    return msg;\n}\n\ntry {\n    const browser = await getBrowser();\n    const page = await browser.newPage();\n    try {\n        await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });\n        const text = await page.evaluate(() => document.body.innerText);\n        const title = await page.evaluate(() => document.title);\n        msg.payload = { success: true, title: title, text: text, url: url };\n    } finally {\n        await page.close();\n    }\n} catch (err) {\n    msg.payload = { success: false, error: err.message };\n    msg.statusCode = 500;\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 60,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 240,
+        "wires": [
+            ["scrape-out"]
+        ]
+    },
+    {
+        "id": "scrape-out",
+        "type": "http response",
+        "z": "webos-services-tab",
+        "name": "Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 570,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "pdf-in",
+        "type": "http in",
+        "z": "webos-services-tab",
+        "name": "POST /os/pdf",
+        "url": "/os/pdf",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 360,
+        "wires": [
+            ["pdf-func"]
+        ]
+    },
+    {
+        "id": "pdf-func",
+        "type": "function",
+        "z": "webos-services-tab",
+        "name": "Generate PDF",
+        "func": "const getBrowser = global.get('getBrowser');\nif (!getBrowser) {\n    msg.payload = { success: false, error: 'Browser service not available. Puppeteer may still be installing.' };\n    msg.statusCode = 503;\n    return msg;\n}\n\nconst html = msg.payload.html;\nif (!html) {\n    msg.payload = { success: false, error: 'Provide \"html\" in the request body.' };\n    msg.statusCode = 400;\n    return msg;\n}\n\ntry {\n    const browser = await getBrowser();\n    const page = await browser.newPage();\n    try {\n        await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });\n        const pdf = await page.pdf({ format: 'A4', printBackground: true });\n        const base64 = pdf.toString('base64');\n        msg.payload = { success: true, pdf: 'data:application/pdf;base64,' + base64 };\n    } finally {\n        await page.close();\n    }\n} catch (err) {\n    msg.payload = { success: false, error: err.message };\n    msg.statusCode = 500;\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 60,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 360,
+        "wires": [
+            ["pdf-out"]
+        ]
+    },
+    {
+        "id": "pdf-out",
+        "type": "http response",
+        "z": "webos-services-tab",
+        "name": "Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 570,
+        "y": 360,
+        "wires": []
+    }
+]
