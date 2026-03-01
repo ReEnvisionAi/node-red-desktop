@@ -73,7 +73,23 @@ settings.functionGlobalContext = {
 
 var url = 'http://' + settings.uiHost + ':' + settings.uiPort + settings.httpAdminRoot;
 
-process.execPath = 'node';
+// Resolve a real Node.js binary so Node-RED child-process calls work.
+// In a packaged Electron app process.execPath points to the Electron exe,
+// which causes "spawn EINVAL" on Windows if overridden to a bare 'node'.
+var resolvedNode = null;
+try {
+    resolvedNode = child_process.execFileSync(
+        process.platform === 'win32' ? 'where' : 'which',
+        ['node'],
+        { encoding: 'utf8', timeout: 5000 }
+    ).split(/\r?\n/)[0].trim();
+} catch (_) {
+    // node not on PATH — leave process.execPath as-is (Electron binary)
+}
+if (resolvedNode) {
+    process.execPath = resolvedNode;
+}
+
 if (process.platform === 'darwin') {
     process.env.PATH += ':/usr/local/bin';
     app.dock.hide();
