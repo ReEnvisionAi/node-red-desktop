@@ -7,7 +7,7 @@
   },
   "build": {
     "appId": "com.electron.node-red",
-    "productName": "Offline - AgentOS",
+    "productName": "AgentOS",
     "asar": true,
     "asarUnpack": [
       "build/**",
@@ -68,7 +68,7 @@
     "electron": "35.7.5",
     "electron-builder": "26.7.0"
   },
-  "description": "Offline - AgentOS with WebOS Edge Node browser services",
+  "description": "AgentOS with WebOS Edge Node browser services",
   "keywords": [
     "node-red",
     "installer",

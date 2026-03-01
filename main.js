@@ -51,7 +51,7 @@ var settings = {
     editorTheme: {
         projects: { enabled: true },
         page: {
-            title: 'Offline - AgentOS',
+            title: 'AgentOS',
             favicon: path.join(unpackedDir, 'build', 'icon.png'),
             tabicon: {
                 icon: path.join(unpackedDir, 'build', 'icon.png'),
@@ -59,7 +59,7 @@ var settings = {
             }
         },
         header: {
-            title: 'Offline - AgentOS',
+            title: 'AgentOS',
             image: path.join(unpackedDir, 'build', 'icon.png')
         }
     }
@@ -152,13 +152,13 @@ if (!app.requestSingleInstanceLock()) {
 
             app.whenReady().then(function () {
                 tray = new Tray(path.join(unpackedDir, 'build', 'icon.png'));
-                tray.setToolTip('Offline - AgentOS');
+                tray.setToolTip('AgentOS');
                 tray.on('click', function () {
                     shell.openExternal(url);
                 });
                 tray.setContextMenu(Menu.buildFromTemplate([
                     {
-                        label: 'Offline - AgentOS', click: function () {
+                        label: 'AgentOS', click: function () {
                             shell.openExternal(url);
                         }
                     },
@@ -168,7 +168,6 @@ if (!app.requestSingleInstanceLock()) {
                         }
                     }
                 ]));
-                shell.openExternal(url);
             });
         }).catch(function (error) {
             dialog.showErrorBox('Error', error.toString());
